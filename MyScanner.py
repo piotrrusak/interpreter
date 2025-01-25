@@ -1,7 +1,7 @@
 from sly import Lexer
 
 
-class MyLexer(Lexer):
+class MyScanner(Lexer):
     def __init__(self):
         self.nesting_level = 0
 
@@ -19,7 +19,7 @@ class MyLexer(Lexer):
         ONES,
         PRINT,
         INTNUM,
-        FLOAT,
+        FLOATNUM,
 
         MULASSIGN,
         SUBASSIGN,
@@ -101,7 +101,7 @@ class MyLexer(Lexer):
         return t
 
     @_(r"[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?|\d+\.")
-    def FLOAT(self, t):
+    def FLOATNUM(self, t):
         t.value = float(t.value)
         return t
 
@@ -121,3 +121,16 @@ class MyLexer(Lexer):
     @_(r'[\d\.\?]+[a-zA-Z]*')
     def bad_token(self, t):
         print(f"ERROR: Unknown token at line {self.lineno}: {t.value}")
+
+if __name__ == "__main__":
+    with open("z1/ex1.txt") as f:
+        data = f.read()
+
+        lexer = MyScanner()
+        tokens = lexer.tokenize(data)
+
+        for tok in tokens:
+            print(f"({tok.lineno}): {tok.type}({tok.value})")
+
+        if (lexer.nesting_level != 0):
+            print("Error: braces are not nested correctly")
