@@ -1,6 +1,7 @@
 from MyScanner import MyScanner
 import AST
 from sly import Parser
+import TreePrinter
 
 class MyParser(Parser):
     tokens = MyScanner.tokens
@@ -12,11 +13,11 @@ class MyParser(Parser):
         ('nonassoc', LTE, GTE, EQ, NEQ, LT, GT),
         ('left', ADD, SUB, DOTADD, DOTSUB),
         ('left', MUL, DIV, DOTMUL, DOTDIV),
-        # ('nonassoc', "'")
+        ('nonassoc', "'")
     )
 
-    @_('stmt',
-       'statements stmt')
+    @_('statements stmt',
+       'stmt')
     def statements(self, p):
         if len(p) == 1:
             return AST.StatementsNode([p[0]], lineno=p.lineno)
@@ -26,16 +27,18 @@ class MyParser(Parser):
 
         return AST.StatementsNode(statements, lineno=p.lineno)
 
-    @_('";"',
-       '"{" statements "}"',
-       'if_stmt',
-       'while_stmt',
-       'for_stmt',
-       'assign_expr',
-       'print_stmt',
-       'BREAK ";"',
-       'CONTINUE ";"',
-       'RETURN expr ";"')
+    @_(
+        '";"',
+        '"{" statements "}"',
+        'if_stmt',
+        'while_stmt',
+        'for_stmt',
+        'assign_expr',
+        'print_stmt',
+        'BREAK ";"',
+        'CONTINUE ";"',
+        'RETURN expr ";"'
+    )
     def stmt(self, p):
         try:
             if (p.BREAK):
@@ -61,8 +64,10 @@ class MyParser(Parser):
 
         return p[1]
 
-    @_('IF "(" rel_expr ")" stmt ELSE stmt',
-       'IF "(" rel_expr ")" stmt %prec IFX')
+    @_(
+        'IF "(" rel_expr ")" stmt ELSE stmt',
+        'IF "(" rel_expr ")" stmt %prec IFX'
+    )
     def if_stmt(self, p):
         condition = p[2]
         if_body = p[4]
@@ -76,12 +81,14 @@ class MyParser(Parser):
 
         return AST.IfElseExpr(condition, if_body, else_body, lineno=p.lineno)
 
-    @_('referance',
-       'INTNUM')
+    @_(
+        'referance',
+        'INTNUM'
+    )
     def int_referance(self, p):
         try:
             if (p.INTNUM):
-                return AST.IntNum(-p[0], lineno=p.lineno)
+                return AST.IntNum(p[0], lineno=p.lineno)
         except:
             pass
         try:
@@ -90,40 +97,70 @@ class MyParser(Parser):
         except:
             pass
 
-    @_('FOR referance "=" int_referance ":" int_referance stmt')
+    @_(
+        'FOR referance "=" value ":" value stmt'
+    )
     def for_stmt(self, p):
         return AST.ForLoop(p[3], p[5], p[6], p.lineno)
 
-    @_('WHILE "(" rel_expr ")" stmt')
+    @_(
+        'WHILE "(" rel_expr ")" stmt'
+    )
     def while_stmt(self, p):
-        return AST.WhileLoop(p[3], p[5], p.lineno)
+        return AST.WhileLoop(p[2], p[4], p.lineno)
 
-    @_('PRINT expr')
+    @_(
+        'PRINT expr'
+    )
     def print_stmt(self, p):
         return AST.Print(p[1], lineno=p.lineno)
 
-    @_('INTNUM')
+    @_(
+        'INTNUM'
+    )
     def value(self, p):
-        return AST.IntNum(p[0], p.lineno)
+        return AST.Value(p[0], p.lineno)
 
-    @_('FLOATNUM')
+    @_(
+        'FLOATNUM'
+    )
     def value(self, p):
-        return AST.FloatNum(p[0], p.lineno)
+        return AST.Value(p[0], p.lineno)
 
-    @_('STRING')
+    @_(
+        'STRING'
+    )
     def value(self, p):
-        return AST.String(p[0], p.lineno)
+        return AST.Value(p[0], p.lineno)
 
-    @_('EYE "(" int_referance ")"',
-       'ONES "(" int_referance ")"',
-       'ZEROS "(" int_referance ")"',)
+    @_(
+        'referance'
+    )
     def value(self, p):
-        return AST.ValueVector(p[2], p.lineno)
+        return AST.Value(p[0], p.lineno)
 
-    @_('value',
-       'string_of_values "," value',
-       'vector',
-       'string_of_values "," vector')
+    @_(
+        'ZEROS "(" int_referance ")"',
+        'ONES "(" int_referance ")"',
+        'EYE "(" int_referance ")"'
+    )
+    def matrix_func(self, p):
+        func_name = p[0]
+        size = p[2]
+
+        if func_name == 'zeros':
+            return AST.ZerosFunc(func_name, size, lineno=p.lineno)
+        elif func_name == 'ones':
+            return AST.OnesFunc(func_name, size, lineno=p.lineno)
+        elif func_name == 'eye':
+            return AST.EyeFunc(func_name, size, lineno=p.lineno)
+
+    @_(
+        'value',
+        'string_of_values "," value',
+        'vector',
+        'string_of_values "," vector'
+    )
     def string_of_values(self, p):
         if len(p) == 1:
             values = [p[0]]
@@ -139,8 +176,10 @@ class MyParser(Parser):
         return AST.Vector(p[1], p.lineno)
 
 
-    @_('ID',
-       'ID "[" string_of_values "]"')
+    @_(
+        'ID',
+        'ID "[" string_of_values "]"'
+    )
     def referance(self, p):
         if len(p) == 1:
             return AST.IDRef(p[0], p.lineno)
@@ -150,7 +189,7 @@ class MyParser(Parser):
     @_(
         'string_of_values',
         'rel_expr',
-        'referance',
+        'matrix_func'
        )
     def expr(self, p):
         return AST.Expr(p[0], p.lineno)
@@ -165,33 +204,39 @@ class MyParser(Parser):
         'expr "\'"'
     )
     def expr(self, p):
-        return AST.TransposeRef(p[1], lineno=p.lineno)
+        return AST.TransposeRef(p[0], lineno=p.lineno)
 
-    @_('expr ADD expr',
-       'expr SUB expr',
-       'expr MUL expr',
-       'expr DIV expr',
-       'expr DOTADD expr',
-       'expr DOTSUB expr',
-       'expr DOTMUL expr',
-       'expr DOTDIV expr',)
+    @_(
+        'expr ADD expr',
+        'expr SUB expr',
+        'expr MUL expr',
+        'expr DIV expr',
+        'expr DOTADD expr',
+        'expr DOTSUB expr',
+        'expr DOTMUL expr',
+        'expr DOTDIV expr'
+    )
     def expr(self, p):
         return AST.BinExpr(p[0], p[1], p[2], p.lineno)
 
-    @_('expr LT expr',
-       'expr GT expr',
-       'expr LTE expr',
-       'expr GTE expr',
-       'expr EQ expr',
-       'expr NEQ expr')
+    @_(
+        'expr LT expr',
+        'expr GT expr',
+        'expr LTE expr',
+        'expr GTE expr',
+        'expr EQ expr',
+        'expr NEQ expr'
+    )
     def rel_expr(self, p):
         return AST.RelExpr(p[0], p[1], p[2], p.lineno)
 
-    @_('referance "=" expr',
-       'referance ADDASSIGN expr',
-       'referance SUBASSIGN expr',
-       'referance MULASSIGN expr',
-       'referance DIVASSIGN expr')
+    @_(
+        'referance "=" expr',
+        'referance ADDASSIGN expr',
+        'referance SUBASSIGN expr',
+        'referance MULASSIGN expr',
+        'referance DIVASSIGN expr'
+    )
     def assign_expr(self, p):
         return AST.AssignExpr(p[0], p[1], p[2], p.lineno)
 
@@ -205,16 +250,17 @@ if __name__ == '__main__':
     with open("z2/ex1.txt") as file:
         data = file.read()
         ast = parser.parse(lexer.tokenize(data))
-        # ast.printTree()
+        ast.printTree()
 
     print("##### [TEST 2] #####")
     with open("z2/ex2.txt") as file:
         data = file.read()
         ast = parser.parse(lexer.tokenize(data))
-        # ast.printTree()
+        ast.printTree()
 
     print("##### [TEST 3] #####")
     with open("z2/ex3.txt") as file:
         data = file.read()
-        # ast = parser.parse(lexer.tokenize(data))
+        ast = parser.parse(lexer.tokenize(data))
+        ast.printTree()
 

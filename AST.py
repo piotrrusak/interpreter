@@ -27,15 +27,15 @@ class Variable(Node):
         super().__init__(lineno)
         self.name = name
 
-class String(Node):
+class Value(Node):
     def __init__(self, value, lineno):
         super().__init__(lineno)
         self.value = value
 
-class ValueVector(Node):
-    def __init__(self, values, lineno):
+class String(Node):
+    def __init__(self, value, lineno):
         super().__init__(lineno)
-        self.value = values
+        self.value = value
 
 class BinExpr(Node):
     def __init__(self, left, op, right, lineno):
@@ -58,9 +58,9 @@ class RelExpr(Node):
         self.right = right
 
 class AssignExpr(Node):
-    def __init__(self, variable, op, value, lineno):
+    def __init__(self, ref, op, value, lineno):
         super().__init__(lineno)
-        self.variable = variable
+        self.ref = ref
         self.op = op
         self.value = value
 
@@ -90,18 +90,21 @@ class Matrix(Node):
         self.matrix = matrix
 
 class EyeFunc(Node):
-    def __init__(self, size, lineno):
+    def __init__(self, name, size, lineno):
         super().__init__(lineno)
+        self.name = name
         self.size = size
 
 class ZerosFunc(Node):
-    def __init__(self, size, lineno):
+    def __init__(self, name, size, lineno):
         super().__init__(lineno)
+        self.name = name
         self.size = size
 
 class OnesFunc(Node):
-    def __init__(self, size, lineno):
+    def __init__(self, name, size, lineno):
         super().__init__(lineno)
+        self.name = name
         self.size = size
 
 class IDRef(Node):
@@ -145,6 +148,7 @@ class NegationRef(Node):
 class TransposeRef(Node):
     def __init__(self, value_vector, lineno):
         super().__init__(lineno)
+        print(type(value_vector))
         self.value = value_vector
 
 class StringOfValues(Node):
