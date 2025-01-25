@@ -123,7 +123,7 @@ class MyScanner(Lexer):
         print(f"ERROR: Unknown token at line {self.lineno}: {t.value}")
 
 if __name__ == "__main__":
-    with open("z1/ex1.txt") as f:
+    with open("z2/ex2.txt") as f:
         data = f.read()
 
         lexer = MyScanner()

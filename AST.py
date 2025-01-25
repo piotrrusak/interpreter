@@ -2,6 +2,11 @@ class Node:
     def __init__(self, lineno):
         self.lineno = lineno
 
+class StatementsNode(Node):
+    def __init__(self, statements, lineno):
+        super().__init__(lineno)
+        self.statements = statements
+
 class Expr(Node):
     def __init__(self, expr, lineno):
         super().__init__(lineno)
@@ -114,3 +119,40 @@ class Print(Node):
     def __init__(self, value, lineno):
         super().__init__(lineno)
         self.value = value
+
+class BreakStatement(Node):
+    def __init__(self, lineno):
+        super().__init__(lineno)
+
+class ContinueStatement(Node):
+    def __init__(self, lineno):
+        super().__init__(lineno)
+
+class ReturnStatement(Node):
+    def __init__(self, value, lineno):
+        super().__init__(lineno)
+        self.value = value
+
+class BlankStatement(Node):
+    def __init__(self, lineno):
+        super().__init__(lineno)
+
+class NegationRef(Node):
+    def __init__(self, value, lineno):
+        super().__init__(lineno)
+        self.value = value
+
+class TransposeRef(Node):
+    def __init__(self, value_vector, lineno):
+        super().__init__(lineno)
+        self.value = value_vector
+
+class StringOfValues(Node):
+    def __init__(self, values, lineno):
+        super().__init__(lineno)
+        self.values = values
+
+class Vector(Node):
+    def __init__(self, string_of_values, lineno):
+        super().__init__(lineno)
+        self.string_of_values = string_of_values

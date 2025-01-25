@@ -74,14 +74,14 @@ class MyParser(Parser):
         except:
             pass
 
-        return AST.IfElseNode(condition, if_body, else_body, lineno=p.lineno)
+        return AST.IfElseExpr(condition, if_body, else_body, lineno=p.lineno)
 
     @_('referance',
        'INTNUM')
     def int_referance(self, p):
         try:
             if (p.INTNUM):
-                return AST.IntNum(p[0], lineno=p.lineno)
+                return AST.IntNum(-p[0], lineno=p.lineno)
         except:
             pass
         try:
@@ -114,28 +114,58 @@ class MyParser(Parser):
     def value(self, p):
         return AST.String(p[0], p.lineno)
 
+    @_('EYE "(" int_referance ")"',
+       'ONES "(" int_referance ")"',
+       'ZEROS "(" int_referance ")"',)
+    def value(self, p):
+        return AST.ValueVector(p[2], p.lineno)
+
     @_('value',
-       'value_vector "," value')
-    def value_vector(self, p):
+       'string_of_values "," value',
+       'vector',
+       'string_of_values "," vector')
+    def string_of_values(self, p):
         if len(p) == 1:
             values = [p[0]]
         else:
             values = p[0].values
             values.append(p[2])
-        return AST.ValueVector(values, p.lineno)
+        return AST.StringOfValues(values, p.lineno)
+
+    @_(
+        '"[" string_of_values "]"'
+    )
+    def vector(self, p):
+        return AST.Vector(p[1], p.lineno)
+
 
     @_('ID',
-       'ID "[" value_vector "]"')
+       'ID "[" string_of_values "]"')
     def referance(self, p):
         if len(p) == 1:
             return AST.IDRef(p[0], p.lineno)
         else:
-            return AST.MatrixCellRef(p[0], p[2]. p.lineno)
+            return AST.MatrixCellRef(p[0], p[2], p.lineno)
 
-    @_('value_vector',
-       'rel_expr',)
+    @_(
+        'string_of_values',
+        'rel_expr',
+        'referance',
+       )
     def expr(self, p):
         return AST.Expr(p[0], p.lineno)
+
+    @_(
+        'SUB expr'
+    )
+    def expr(self, p):
+        return AST.NegationRef(p[1], lineno=p.lineno)
+
+    @_(
+        'expr "\'"'
+    )
+    def expr(self, p):
+        return AST.TransposeRef(p[1], lineno=p.lineno)
 
     @_('expr ADD expr',
        'expr SUB expr',
@@ -171,16 +201,16 @@ if __name__ == '__main__':
     lexer = MyScanner()
     parser = MyParser()
 
-    # print("##### [TEST 1] #####")
-    # with open("z2/ex1.txt") as file:
-    #     data = file.read()
-    #     ast = parser.parse(lexer.tokenize(data))
+    print("##### [TEST 1] #####")
+    with open("z2/ex1.txt") as file:
+        data = file.read()
+        ast = parser.parse(lexer.tokenize(data))
         # ast.printTree()
 
-    # print("##### [TEST 2] #####")
-    # with open("z2/ex2.txt") as file:
-    #     data = file.read()
-    #     ast = parser.parse(lexer.tokenize(data))
+    print("##### [TEST 2] #####")
+    with open("z2/ex2.txt") as file:
+        data = file.read()
+        ast = parser.parse(lexer.tokenize(data))
         # ast.printTree()
 
     print("##### [TEST 3] #####")
