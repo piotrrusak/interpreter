@@ -82,26 +82,10 @@ class MyParser(Parser):
         return AST.IfElseExpr(condition, if_body, else_body, lineno=p.lineno)
 
     @_(
-        'referance',
-        'INTNUM'
-    )
-    def int_referance(self, p):
-        try:
-            if (p.INTNUM):
-                return AST.IntNum(p[0], lineno=p.lineno)
-        except:
-            pass
-        try:
-            if (p.ID):
-                return AST.IDRef(p[0], lineno=p.lineno)
-        except:
-            pass
-
-    @_(
         'FOR referance "=" value ":" value stmt'
     )
     def for_stmt(self, p):
-        return AST.ForLoop(p[3], p[5], p[6], p.lineno)
+        return AST.ForLoop(p[1], p[3], p[5], p[6], p.lineno)
 
     @_(
         'WHILE "(" rel_expr ")" stmt'
@@ -110,7 +94,7 @@ class MyParser(Parser):
         return AST.WhileLoop(p[2], p[4], p.lineno)
 
     @_(
-        'PRINT expr'
+        'PRINT value'
     )
     def print_stmt(self, p):
         return AST.Print(p[1], lineno=p.lineno)
@@ -118,42 +102,45 @@ class MyParser(Parser):
     @_(
         'INTNUM'
     )
-    def value(self, p):
-        return AST.Value(p[0], p.lineno)
+    def IntNum(self, p):
+        return AST.IntNum(p[0], p.lineno)
 
     @_(
         'FLOATNUM'
     )
-    def value(self, p):
-        return AST.Value(p[0], p.lineno)
+    def FloatNum(self, p):
+        return AST.FloatNum(p[0], p.lineno)
 
     @_(
         'STRING'
     )
-    def value(self, p):
-        return AST.Value(p[0], p.lineno)
+    def String(self, p):
+        return AST.String(p[0], p.lineno)
 
     @_(
+        'IntNum',
+        'FloatNum',
+        'String',
         'referance'
     )
     def value(self, p):
         return AST.Value(p[0], p.lineno)
 
     @_(
-        'ZEROS "(" int_referance ")"',
-        'ONES "(" int_referance ")"',
-        'EYE "(" int_referance ")"'
+        'ZEROS "(" value ")"',
+        'ONES "(" value ")"',
+        'EYE "(" value ")"'
     )
     def matrix_func(self, p):
         func_name = p[0]
         size = p[2]
 
         if func_name == 'zeros':
-            return AST.ZerosFunc(func_name, size, lineno=p.lineno)
+            return AST.ZerosFunc(size, lineno=p.lineno)
         elif func_name == 'ones':
-            return AST.OnesFunc(func_name, size, lineno=p.lineno)
+            return AST.OnesFunc(size, lineno=p.lineno)
         elif func_name == 'eye':
-            return AST.EyeFunc(func_name, size, lineno=p.lineno)
+            return AST.EyeFunc(size, lineno=p.lineno)
 
     @_(
         'value',
@@ -178,18 +165,18 @@ class MyParser(Parser):
 
     @_(
         'ID',
-        'ID "[" string_of_values "]"'
+        'referance vector'
     )
     def referance(self, p):
         if len(p) == 1:
             return AST.IDRef(p[0], p.lineno)
         else:
-            return AST.MatrixCellRef(p[0], p[2], p.lineno)
+            return AST.VectorCellRef(p[0], p[1], p.lineno)
 
     @_(
-        'string_of_values',
+        'value',
         'rel_expr',
-        'matrix_func'
+        'matrix_func',
        )
     def expr(self, p):
         return AST.Expr(p[0], p.lineno)
@@ -205,6 +192,12 @@ class MyParser(Parser):
     )
     def expr(self, p):
         return AST.TransposeRef(p[0], lineno=p.lineno)
+
+    # @_(
+    #     'referance'
+    # )
+    # def expr(self, p):
+    #     return AST.Expr(p[0], lineno=p.lineno)
 
     @_(
         'expr ADD expr',
@@ -246,21 +239,20 @@ if __name__ == '__main__':
     lexer = MyScanner()
     parser = MyParser()
 
-    print("##### [TEST 1] #####")
-    with open("z2/ex1.txt") as file:
-        data = file.read()
-        ast = parser.parse(lexer.tokenize(data))
-        ast.printTree()
-
-    print("##### [TEST 2] #####")
-    with open("z2/ex2.txt") as file:
-        data = file.read()
-        ast = parser.parse(lexer.tokenize(data))
-        ast.printTree()
+    # print("##### [TEST 1] #####")
+    # with open("z2/ex1.txt") as file:
+    #     data = file.read()
+    #     ast = parser.parse(lexer.tokenize(data))
+    #     ast.printTree()
+    #
+    # print("##### [TEST 2] #####")
+    # with open("z2/ex2.txt") as file:
+    #     data = file.read()
+    #     ast = parser.parse(lexer.tokenize(data))
+    #     ast.printTree()
 
     print("##### [TEST 3] #####")
     with open("z2/ex3.txt") as file:
         data = file.read()
         ast = parser.parse(lexer.tokenize(data))
         ast.printTree()
-

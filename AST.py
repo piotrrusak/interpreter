@@ -44,12 +44,6 @@ class BinExpr(Node):
         self.op = op
         self.right = right
 
-class UnaryExpr(Node):
-    def __init__(self, operator, operand, lineno):
-        super().__init__(lineno)
-        self.operator = operator
-        self.operand = operand
-
 class RelExpr(Node):
     def __init__(self, left, op_operator, right, lineno):
         super().__init__(lineno)
@@ -72,8 +66,9 @@ class IfElseExpr(Node):
         self.else_instructions = else_instructions
 
 class ForLoop(Node):
-    def __init__(self, start, end, instructions, lineno):
+    def __init__(self, ref, start, end, instructions, lineno):
         super().__init__(lineno)
+        self.ref = ref
         self.start = start
         self.end = end
         self.instructions = instructions
@@ -84,27 +79,20 @@ class WhileLoop(Node):
         self.condition = condition
         self.instructions = instructions
 
-class Matrix(Node):
-    def __init__(self, matrix, lineno):
-        super().__init__(lineno)
-        self.matrix = matrix
-
 class EyeFunc(Node):
-    def __init__(self, name, size, lineno):
-        super().__init__(lineno)
-        self.name = name
+    def __init__(self, size, lineno):
         self.size = size
+        super().__init__(lineno)
+
 
 class ZerosFunc(Node):
-    def __init__(self, name, size, lineno):
+    def __init__(self, size, lineno):
         super().__init__(lineno)
-        self.name = name
         self.size = size
 
 class OnesFunc(Node):
-    def __init__(self, name, size, lineno):
+    def __init__(self, size, lineno):
         super().__init__(lineno)
-        self.name = name
         self.size = size
 
 class IDRef(Node):
@@ -112,11 +100,17 @@ class IDRef(Node):
         super().__init__(lineno)
         self.name = name
 
-class MatrixCellRef(Node):
+class VectorCellRef(Node):
     def __init__(self, ID, idx, lineno):
         super().__init__(lineno)
         self.ID = ID
         self.idx = idx
+
+class MatrixCellRef(Node):
+    def __init__(self, name, idx_array, lineno):
+        super().__init__(lineno)
+        self.name = name
+        self.idx_array = idx_array
 
 class Print(Node):
     def __init__(self, value, lineno):
@@ -148,7 +142,6 @@ class NegationRef(Node):
 class TransposeRef(Node):
     def __init__(self, value_vector, lineno):
         super().__init__(lineno)
-        print(type(value_vector))
         self.value = value_vector
 
 class StringOfValues(Node):

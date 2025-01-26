@@ -37,10 +37,6 @@ class TreePrinter:
         self.left.printTree(indent + 1)
         self.right.printTree(indent + 1)
 
-    @addToClass(AST.IDRef)
-    def printTree(self, indent=0):
-        print(f"{'|  ' * indent}{self.value}")
-
     @addToClass(AST.ZerosFunc)
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}ZEROS")
@@ -66,10 +62,16 @@ class TreePrinter:
         print(f"{'|  ' * indent}VECTOR")
         self.string_of_values.printTree(indent+1)
 
+    @addToClass(AST.VectorCellRef)
+    def printTree(self, indent=0):
+        print(f"{'|  ' * indent}VECTOR CELL REF")
+        self.ID.printTree(indent + 1)
+        self.idx.printTree(indent + 1)
+
     @addToClass(AST.MatrixCellRef)
     def printTree(self, indent=0):
-        print(f"{'|  ' * indent}{self.ID}")
-        self.idx.printTree(indent + 1)
+        print(f"{'|  ' * indent}{self.name}")
+        self.idx_array.printTree(indent + 1)
 
     @addToClass(AST.IntNum)
     def printTree(self, indent=0):
@@ -79,9 +81,13 @@ class TreePrinter:
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}{self.value}")
 
-    @addToClass(AST.Value)
+    @addToClass(AST.String)
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}{self.value}")
+
+    @addToClass(AST.Value)
+    def printTree(self, indent=0):
+        self.value.printTree(indent)
 
     @addToClass(AST.NegationRef)
     def printTree(self, indent=0):
@@ -106,19 +112,20 @@ class TreePrinter:
     @addToClass(AST.ForLoop)
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}FOR")
-        self.start.printTree(indent + 1)
-        self.end.printTree(indent + 1)
+        self.ref.printTree(indent + 1)
+        self.start.printTree(indent + 2)
+        self.end.printTree(indent + 2)
         self.instructions.printTree(indent + 1)
 
     @addToClass(AST.Print)
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}PRINT")
-        self.value.printTree(indent)
+        self.value.printTree(indent + 1)
 
     @addToClass(AST.WhileLoop)
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}WHILE")
-        self.condition.printTree(indent)
+        self.condition.printTree(indent + 1)
         self.instructions.printTree(indent + 1)
 
     @addToClass(AST.IfElseExpr)
@@ -146,7 +153,6 @@ class TreePrinter:
     def printTree(self, indent=0):
         print(f"{'|  ' * indent}RETURN")
         self.value.printTree(indent+1)
-
 
     @addToClass(AST.BlankStatement)
     def printTree(self, indent=0):
