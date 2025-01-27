@@ -50,6 +50,10 @@ class Interpreter(object):
                 return flag
         return 0
 
+    @when(AST.BlankStatement)
+    def visit(self, node):
+        return 0
+
     # ==================================================================================================================
     # STATEMENTS
     # ==================================================================================================================
@@ -75,17 +79,16 @@ class Interpreter(object):
         ref = self.visit(node.ref, False)
         start = self.visit(node.start)
         end = self.visit(node.end)
-        instructions = self.visit(node.instructions)
+        self.symbol_table.put(ref, start)
+        instructions = node.instructions
 
         for i in range(start, end):
-            self.symbol_table.put(ref, i)
             flag = self.visit(instructions)
-            if flag == 1:
+            if flag == 1 or flag == 3:
                 return flag
 
-            start = self.visit(node.start)
-            end = self.visit(node.end)
-            instructions = self.visit(node.instructions)
+            instructions = node.instructions
+            self.symbol_table.put(ref, i+1)
 
         return 0
 
@@ -93,24 +96,24 @@ class Interpreter(object):
     def visit(self, node):
 
 
-        condition = self.visit(node.condition)
-        instructions = self.visit(node.instructions)
+        condition = node.condition
+        instructions = node.instructions
 
-        while condition:
+        while self.visit(condition):
             flag = self.visit(instructions)
             if flag == 1:
                 return flag
-            condition = self.visit(node.condition)
-            instructions = self.visit(node.instructions)
+            condition = node.condition
+            instructions = node.instructions
 
         return 0
 
     @when(AST.IfElseExpr)
     def visit(self, node):
 
-        condition = self.visit(node.condition)
-        if_instructions = self.visit(node.if_instructions)
-        else_instructions = self.visit(node.else_instructions)
+        condition = node.condition
+        if_instructions = node.if_instructions
+        else_instructions = node.else_instructions
 
         if self.visit(condition):
             flag = self.visit(if_instructions)
@@ -126,7 +129,7 @@ class Interpreter(object):
     @when(AST.Print)
     def visit(self, node):
         value = self.visit(node.value)
-        print(value)
+        print("Print: ", value)
 
     @when(AST.ReturnStatement)
     def visit(self, node):

@@ -73,11 +73,14 @@ class MyParser(Parser):
         if_body = p[4]
         else_body = None
 
+
         try:
             if (p.ELSE):
                 else_body = p[6]
         except:
             pass
+
+        print(if_body, else_body)
 
         return AST.IfElseExpr(condition, if_body, else_body, lineno=p.lineno)
 
