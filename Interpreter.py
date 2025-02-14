@@ -1,5 +1,3 @@
-from numpy.ma.core import set_fill_value
-
 from MyScanner import MyScanner
 from MyParser import MyParser
 from SymbolTable import SymbolTable
@@ -84,7 +82,8 @@ class Interpreter(object):
 
         for i in range(start, end):
             flag = self.visit(instructions)
-            if flag == 1 or flag == 3:
+            print("for", flag)
+            if flag == 1 or flag == 2:
                 return flag
 
             instructions = node.instructions
@@ -95,13 +94,12 @@ class Interpreter(object):
     @when(AST.WhileLoop)
     def visit(self, node):
 
-
         condition = node.condition
         instructions = node.instructions
 
         while self.visit(condition):
             flag = self.visit(instructions)
-            if flag == 1:
+            if flag == 1 or flag == 2:
                 return flag
             condition = node.condition
             instructions = node.instructions
@@ -245,7 +243,8 @@ if __name__ == '__main__':
     EXAMPLES = [
         # "ex1",
         # "ex2",
-        "ex3"
+        # "ex3",
+        "ex4"
     ]
 
     for example in EXAMPLES:

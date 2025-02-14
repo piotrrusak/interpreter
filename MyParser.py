@@ -210,7 +210,8 @@ class MyParser(Parser):
         'expr DOTADD expr',
         'expr DOTSUB expr',
         'expr DOTMUL expr',
-        'expr DOTDIV expr'
+        'expr DOTDIV expr',
+        '"(" expr ")"'
     )
     def expr(self, p):
         return AST.BinExpr(p[0], p[1], p[2], p.lineno)

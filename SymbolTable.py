@@ -13,9 +13,3 @@ class SymbolTable():
     def get(self, name):
         symbol = self.symbols[name]
         return symbol
-
-    def contains(self, name):
-        if name in self.symbols:
-            return True
-        else:
-            return False
