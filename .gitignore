@@ -1,0 +1,26 @@
+# Pliki Python
+__pycache__/
+*.py[cod]
+
+# Wirtualne środowisko
+venv/
+.env
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
+
+# Pliki zależności
+*.lock
+
+# Pliki logów
+*.log
+
+# Konfiguracja PyCharm
+.idea/
+
+# Pliki parsera
+parser.out
+
+# Folder z2
+z2/

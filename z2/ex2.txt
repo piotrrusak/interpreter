@@ -1,0 +1,24 @@
+# assignment operators
+# binary operators
+# transposition
+
+A = 1;
+B = 2;
+
+C = A+B ;   # assignemnt with binary addition
+print C;
+C = A-B ;   # assignemnt with binary substraction
+print C;
+C = A*B ;   # assignemnt with binary multiplication
+print C;
+C = A/B ;   # assignemnt with binary division
+print C;
+
+C += B ;  # add B to C
+print C;
+C -= B ;  # substract B from C
+print C;
+C *= A ;  # multiply A with C
+print C;
+C /= A ;  # divide A by C
+print C;
